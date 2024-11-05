@@ -58,7 +58,7 @@
 
 
 	}
-	let  Detail = {
+	const  Detail = {
 
 		name:"amjad",
 		number:22
