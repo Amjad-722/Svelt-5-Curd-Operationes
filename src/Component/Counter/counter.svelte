@@ -5,7 +5,7 @@
     let minus =$derived (double - 2);
 
 //props
-    let {number,name} = $props ()
+    let {name,number} = $props ();
 
     
     

@@ -55,10 +55,21 @@
 	function reset_inputs(person) {
 		first = person ? person.first : '';
 		last = person ? person.last : '';
+
+
 	}
+	let  Detail = {
+
+		name:"amjad",
+		number:22
+
+
+
+	};
+	
 </script>
 
-<div><Counter name="hello" number={23}/></div>
+<div><Counter {...Detail}/></div>
 
 <div class="h-screen  flex flex-col justify-center items-center gap-4">
     <label><input bind:value={first} placeholder="first" class="border-2 border-gray-900 rounded-lg py-2 px-2" /></label>
