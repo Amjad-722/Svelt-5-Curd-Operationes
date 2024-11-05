@@ -58,7 +58,7 @@
 	}
 </script>
 
-<div><Counter number={23}/></div>
+<div><Counter name="hello" number={23}/></div>
 
 <div class="h-screen  flex flex-col justify-center items-center gap-4">
     <label><input bind:value={first} placeholder="first" class="border-2 border-gray-900 rounded-lg py-2 px-2" /></label>

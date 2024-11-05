@@ -5,7 +5,9 @@
     let minus =$derived (double - 2);
 
 
-    let {number} = $props ();
+    let {number,name} = $props ()
+
+    
     
     $effect(() => {
 
@@ -29,3 +31,6 @@
     <p>The number is {number}</p>
     <p> {double} - 2 :{minus}</p>
 </div>
+<h1>
+    this is my {name}
+</h1>
