@@ -1,6 +1,8 @@
 
 
 <script>
+  import Counter from "../Component/Counter/counter.svelte";
+
 	let people = $state([
 		
 	]);
@@ -56,6 +58,7 @@
 	}
 </script>
 
+<div><Counter name="hello" number={23}/></div>
 
 <div class="h-screen  flex flex-col justify-center items-center gap-4">
     <label><input bind:value={first} placeholder="first" class="border-2 border-gray-900 rounded-lg py-2 px-2" /></label>
@@ -81,4 +84,5 @@
 </div>
 </div>
 
+<div class="sss"><Counter/></div>
 
