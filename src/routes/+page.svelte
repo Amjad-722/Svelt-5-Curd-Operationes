@@ -2,6 +2,7 @@
 
 <script>
   import Counter from "../Component/Counter/counter.svelte";
+  import IfLogic from "../Component/Counter/ifLogic.svelte";
 
 	let people = $state([
 		
@@ -70,6 +71,7 @@
 </script>
 
 <div><Counter {...Detail}/></div>
+<div><IfLogic/></div>
 
 <div class="h-screen  flex flex-col justify-center items-center gap-4">
     <label><input bind:value={first} placeholder="first" class="border-2 border-gray-900 rounded-lg py-2 px-2" /></label>
