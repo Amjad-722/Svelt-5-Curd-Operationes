@@ -1,6 +1,6 @@
 <script>
   let people = $state([]);
-  let showAddCard = $state(false);
+  let showModal = $state(false);
   let searchTerm = $state("");
   let sortField = $state("name");
   let sortDirection = $state("asc");
@@ -53,7 +53,7 @@
     ];
     
     resetForm();
-    showAddCard = false;
+    showModal = false;
   }
 
   function updatePerson() {
@@ -67,6 +67,7 @@
     
     resetForm();
     editingId = null;
+    showModal = false;
   }
 
   function editPerson(person) {
@@ -74,7 +75,7 @@
     newLastName = person.lastName;
     newEmail = person.email;
     editingId = person.id;
-    showAddCard = true;
+    showModal = true;
   }
 
   function deletePerson(id) {
@@ -96,10 +97,10 @@
     }
   }
 
-  function cancelEdit() {
+  function closeModal() {
     resetForm();
     editingId = null;
-    showAddCard = false;
+    showModal = false;
   }
 </script>
 
@@ -125,7 +126,7 @@
           on:click={() => {
             resetForm();
             editingId = null;
-            showAddCard = true;
+            showModal = true;
           }}
           class="bg-white text-blue-600 hover:bg-blue-50 font-medium py-2 px-6 rounded-lg transition duration-200 flex items-center gap-2 shadow-sm"
         >
@@ -137,55 +138,69 @@
       </div>
     </div>
 
-    <!-- Add/Edit Card -->
-    {#if showAddCard}
-      <div class="p-6 border-b border-gray-200 bg-blue-50">
-        <h2 class="text-xl font-semibold mb-4 text-gray-800">
-          {editingId ? "Edit Person" : "Add New Person"}
-        </h2>
-        
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">First Name</label>
-            <input
-              bind:value={newFirstName}
-              placeholder="First name"
-              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-            />
+    <!-- Modal Popup -->
+    {#if showModal}
+      <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-xl shadow-xl w-full max-w-md">
+          <div class="p-6">
+            <div class="flex justify-between items-center mb-4">
+              <h2 class="text-xl font-semibold text-gray-800">
+                {editingId ? "Edit Person" : "Add New Person"}
+              </h2>
+              <button 
+                on:click={closeModal}
+                class="text-gray-400 hover:text-gray-500"
+              >
+                <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            
+            <div class="space-y-4">
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">First Name</label>
+                <input
+                  bind:value={newFirstName}
+                  placeholder="First name"
+                  class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                />
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Last Name</label>
+                <input
+                  bind:value={newLastName}
+                  placeholder="Last name"
+                  class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                />
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                <input
+                  bind:value={newEmail}
+                  placeholder="Email"
+                  type="email"
+                  class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                />
+              </div>
+            </div>
+            
+            <div class="flex justify-end gap-3 mt-6">
+              <button
+                on:click={closeModal}
+                class="px-4 py-2 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition duration-200"
+              >
+                Cancel
+              </button>
+              <button
+                on:click={editingId ? updatePerson : addPerson}
+                disabled={!newFirstName || !newLastName || !newEmail}
+                class="px-4 py-2 text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {editingId ? "Update" : "Add"} Person
+              </button>
+            </div>
           </div>
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Last Name</label>
-            <input
-              bind:value={newLastName}
-              placeholder="Last name"
-              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-            />
-          </div>
-          <div class="md:col-span-2">
-            <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
-            <input
-              bind:value={newEmail}
-              placeholder="Email"
-              type="email"
-              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-            />
-          </div>
-        </div>
-        
-        <div class="flex justify-end gap-3">
-          <button
-            on:click={cancelEdit}
-            class="px-4 py-2 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition duration-200"
-          >
-            Cancel
-          </button>
-          <button
-            on:click={editingId ? updatePerson : addPerson}
-            disabled={!newFirstName || !newLastName || !newEmail}
-            class="px-4 py-2 text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {editingId ? "Update" : "Add"} Person
-          </button>
         </div>
       </div>
     {/if}
@@ -273,3 +288,13 @@
     </div>
   </div>
 </div>
+
+<style>
+  /* Add smooth transition for modal */
+  .modal-enter, .modal-leave-to {
+    opacity: 0;
+  }
+  .modal-enter-active, .modal-leave-active {
+    transition: opacity 200ms ease;
+  }
+</style>
