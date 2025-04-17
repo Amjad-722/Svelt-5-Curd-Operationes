@@ -108,7 +108,7 @@
   <div class="max-w-6xl mx-auto bg-white rounded-xl shadow-md overflow-hidden">
     <!-- Header -->
     <div class="bg-gradient-to-r from-blue-500 to-indigo-600 p-6 text-white">
-      <h1 class="text-3xl font-bold mb-4">People Manager</h1>
+      <h1 class="text-3xl font-bold  mb-4">People Manager</h1>
       
       <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div class="relative w-full sm:w-96">
@@ -138,7 +138,6 @@
       </div>
     </div>
 
-    <!-- Modal Popup -->
     {#if showModal}
       <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
         <div class="bg-white rounded-xl shadow-xl w-full max-w-md">
@@ -205,7 +204,6 @@
       </div>
     {/if}
 
-    <!-- People Table -->
     <div class="overflow-x-auto">
       <table class="min-w-full divide-y divide-gray-200">
         <thead class="bg-gray-50">
@@ -236,7 +234,7 @@
                 {/if}
               </div>
             </th>
-            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+            <th class="px-6 py-3 text-right text-xs font-medium text-gray-700 uppercase tracking-wider">
               Actions
             </th>
           </tr>
@@ -244,7 +242,7 @@
         <tbody class="bg-white divide-y divide-gray-200">
           {#if sortedPeople.length === 0}
             <tr>
-              <td colspan="3" class="px-6 py-4 text-center text-gray-500">
+              <td colspan="3" class="px-6 py-4 text-center text-gray-700">
                 {searchTerm ? "No matching people found" : "No people added yet"}
               </td>
             </tr>
@@ -263,7 +261,7 @@
                     </div>
                   </div>
                 </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
                   {person.email}
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
