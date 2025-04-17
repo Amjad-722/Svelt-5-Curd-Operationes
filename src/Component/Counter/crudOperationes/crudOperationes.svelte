@@ -1,105 +1,275 @@
 <script>
+  let people = $state([]);
+  let showAddCard = $state(false);
+  let searchTerm = $state("");
+  let sortField = $state("name");
+  let sortDirection = $state("asc");
 
+  // Form fields
+  let newFirstName = $state("");
+  let newLastName = $state("");
+  let newEmail = $state("");
+  let editingId = $state(null);
 
-let people = $state([]);
-
-  let prefix = $state("");
-  let first = $state("");
-  let last = $state("");
-  let i = $state(0);
-
+  // Derived state
   let filteredPeople = $derived(
-    prefix
-      ? people.filter((person) => {
-          const name = `${person.last}, ${person.first}`;
-          return name.toLowerCase().startsWith(prefix.toLowerCase());
-        })
-      : people
+    people.filter(person => {
+      const searchLower = searchTerm.toLowerCase();
+      const fullName = `${person.firstName} ${person.lastName}`.toLowerCase();
+      return (
+        fullName.includes(searchLower) ||
+        person.email.toLowerCase().includes(searchLower)
+      );
+    })
   );
-  let selected = $derived(filteredPeople[i]);
 
-  $effect(() => {
-    reset_inputs(selected);
-  });
+  let sortedPeople = $derived(
+    [...filteredPeople].sort((a, b) => {
+      let comparison = 0;
+      
+      if (sortField === "name") {
+        const nameA = `${a.lastName}, ${a.firstName}`.toLowerCase();
+        const nameB = `${b.lastName}, ${b.firstName}`.toLowerCase();
+        comparison = nameA.localeCompare(nameB);
+      } else {
+        comparison = a[sortField].toLowerCase().localeCompare(b[sortField].toLowerCase());
+      }
 
-  function create() {
-    people = people.concat({ first, last });
-    i = people.length - 1;
+      return sortDirection === "asc" ? comparison : -comparison;
+    })
+  );
 
-    first = "";
-    last = "";
+  function addPerson() {
+    if (!newFirstName || !newLastName || !newEmail) return;
+    
+    people = [
+      ...people,
+      {
+        id: Date.now(),
+        firstName: newFirstName,
+        lastName: newLastName,
+        email: newEmail
+      }
+    ];
+    
+    resetForm();
+    showAddCard = false;
   }
 
-  function update() {
-    selected.first = first;
-    selected.last = last;
-    people = people;
+  function updatePerson() {
+    if (!newFirstName || !newLastName || !newEmail) return;
+    
+    people = people.map(person => 
+      person.id === editingId 
+        ? { ...person, firstName: newFirstName, lastName: newLastName, email: newEmail }
+        : person
+    );
+    
+    resetForm();
+    editingId = null;
   }
 
-  function remove() {
-    const index = people.indexOf(selected);
-    people = [...people.slice(0, index), ...people.slice(index + 1)];
-
-    first = last = "";
-    i = Math.min(i, filteredPeople.length - 2);
+  function editPerson(person) {
+    newFirstName = person.firstName;
+    newLastName = person.lastName;
+    newEmail = person.email;
+    editingId = person.id;
+    showAddCard = true;
   }
 
-  function reset_inputs(person) {
-    first = person ? person.first : "";
-    last = person ? person.last : "";
+  function deletePerson(id) {
+    people = people.filter(person => person.id !== id);
   }
 
+  function resetForm() {
+    newFirstName = "";
+    newLastName = "";
+    newEmail = "";
+  }
+
+  function toggleSort(field) {
+    if (sortField === field) {
+      sortDirection = sortDirection === "asc" ? "desc" : "asc";
+    } else {
+      sortField = field;
+      sortDirection = "asc";
+    }
+  }
+
+  function cancelEdit() {
+    resetForm();
+    editingId = null;
+    showAddCard = false;
+  }
 </script>
 
-<div class=" flex flex-col justify-center items-center gap-4">
-    <label
-      ><input
-        bind:value={first}
-        placeholder="first"
-        class="border-2 border-gray-900 rounded-lg py-2 px-2"
-      /></label
-    >
-    <label
-      ><input
-        bind:value={last}
-        placeholder="last"
-        class="border-2 border-gray-900 rounded-lg py-2 px-2"
-      /></label
-    >
-  
-    <select
-      bind:value={i}
-      size={5}
-      class="border-2 border-gray-900 rounded-lg w-1/3"
-    >
-      {#each filteredPeople as person, i}
-        <option value={i}>{person.last}, {person.first}</option>
-      {/each}
-    </select>
-  
-    <div class="flex flex-row gap-20">
-      <input
-        placeholder="filter prefix"
-        bind:value={prefix}
-        class="border-2 border-gray-900 rounded-lg py-2"
-      />
-  
-      <div class="">
+<div class="min-h-screen bg-gray-50 p-8">
+  <div class="max-w-6xl mx-auto bg-white rounded-xl shadow-md overflow-hidden">
+    <!-- Header -->
+    <div class="bg-gradient-to-r from-blue-500 to-indigo-600 p-6 text-white">
+      <h1 class="text-3xl font-bold mb-4">People Manager</h1>
+      
+      <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div class="relative w-full sm:w-96">
+          <input
+            bind:value={searchTerm}
+            placeholder="Search people..."
+            class="w-full py-2 px-4 pr-10 rounded-lg text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-300"
+          />
+          <svg class="absolute right-3 top-2.5 h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+        </div>
+        
         <button
-          onclick={create}
-          disabled={!first || !last}
-          class="border-2 border-gray-900 rounded-lg p-1.5">create</button
+          on:click={() => {
+            resetForm();
+            editingId = null;
+            showAddCard = true;
+          }}
+          class="bg-white text-blue-600 hover:bg-blue-50 font-medium py-2 px-6 rounded-lg transition duration-200 flex items-center gap-2 shadow-sm"
         >
-        <button
-          onclick={update}
-          disabled={!first || !last || !selected}
-          class="border-2 border-gray-900 rounded-lg p-1.5">update</button
-        >
-        <button
-          onclick={remove}
-          disabled={!selected}
-          class="border-2 border-gray-900 rounded-lg p-1.5">delete</button
-        >
+          <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+          </svg>
+          Add Person
+        </button>
       </div>
     </div>
+
+    <!-- Add/Edit Card -->
+    {#if showAddCard}
+      <div class="p-6 border-b border-gray-200 bg-blue-50">
+        <h2 class="text-xl font-semibold mb-4 text-gray-800">
+          {editingId ? "Edit Person" : "Add New Person"}
+        </h2>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">First Name</label>
+            <input
+              bind:value={newFirstName}
+              placeholder="First name"
+              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            />
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Last Name</label>
+            <input
+              bind:value={newLastName}
+              placeholder="Last name"
+              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            />
+          </div>
+          <div class="md:col-span-2">
+            <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+            <input
+              bind:value={newEmail}
+              placeholder="Email"
+              type="email"
+              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            />
+          </div>
+        </div>
+        
+        <div class="flex justify-end gap-3">
+          <button
+            on:click={cancelEdit}
+            class="px-4 py-2 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition duration-200"
+          >
+            Cancel
+          </button>
+          <button
+            on:click={editingId ? updatePerson : addPerson}
+            disabled={!newFirstName || !newLastName || !newEmail}
+            class="px-4 py-2 text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {editingId ? "Update" : "Add"} Person
+          </button>
+        </div>
+      </div>
+    {/if}
+
+    <!-- People Table -->
+    <div class="overflow-x-auto">
+      <table class="min-w-full divide-y divide-gray-200">
+        <thead class="bg-gray-50">
+          <tr>
+            <th 
+              on:click={() => toggleSort("name")} 
+              class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+            >
+              <div class="flex items-center">
+                Name
+                {#if sortField === "name"}
+                  <svg class={`ml-1 h-4 w-4 ${sortDirection === "asc" ? "rotate-180" : ""}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                  </svg>
+                {/if}
+              </div>
+            </th>
+            <th 
+              on:click={() => toggleSort("email")} 
+              class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+            >
+              <div class="flex items-center">
+                Email
+                {#if sortField === "email"}
+                  <svg class={`ml-1 h-4 w-4 ${sortDirection === "asc" ? "rotate-180" : ""}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                  </svg>
+                {/if}
+              </div>
+            </th>
+            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Actions
+            </th>
+          </tr>
+        </thead>
+        <tbody class="bg-white divide-y divide-gray-200">
+          {#if sortedPeople.length === 0}
+            <tr>
+              <td colspan="3" class="px-6 py-4 text-center text-gray-500">
+                {searchTerm ? "No matching people found" : "No people added yet"}
+              </td>
+            </tr>
+          {:else}
+            {#each sortedPeople as person (person.id)}
+              <tr class="hover:bg-gray-50">
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <div class="flex items-center">
+                    <div class="flex-shrink-0 h-10 w-10 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 font-medium">
+                      {person.firstName.charAt(0)}{person.lastName.charAt(0)}
+                    </div>
+                    <div class="ml-4">
+                      <div class="text-sm font-medium text-gray-900">
+                        {person.firstName} {person.lastName}
+                      </div>
+                    </div>
+                  </div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  {person.email}
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                  <button
+                    on:click={() => editPerson(person)}
+                    class="text-indigo-600 hover:text-indigo-900 mr-4"
+                  >
+                    Edit
+                  </button>
+                  <button
+                    on:click={() => deletePerson(person.id)}
+                    class="text-red-600 hover:text-red-900"
+                  >
+                    Delete
+                  </button>
+                </td>
+              </tr>
+            {/each}
+          {/if}
+        </tbody>
+      </table>
+    </div>
   </div>
+</div>
