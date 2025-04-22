@@ -1,5 +1,7 @@
 <script>
-  import CrudOperationes from "../Component/Counter/crudOperationes/crudOperationes.svelte";
+  import Alert from "../Component/alert.svelte";
+  import Badge from "../Component/badge.svelte";
+import CrudOperationes from "../Component/Counter/crudOperationes/crudOperationes.svelte";
  
 
  
@@ -8,6 +10,8 @@
 <div class="gap-4">
 
 	<CrudOperationes/>
+  <Alert/>
+  <Badge/>
 </div>
 
 
